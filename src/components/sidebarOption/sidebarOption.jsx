@@ -56,7 +56,7 @@ const SidebarOptionContainer = styled.div`
   padding-left: 2px;
   cursor: pointer;
 
-  :hover {
+  &:hover {
     background-color: rgb(221, 169, 0);
   }
 
@@ -75,7 +75,7 @@ const SidebarOptionChannel = styled.h3`
   font-weight: 300;
   width: 260px;
   background-color: rgb(60, 146, 199);
-  :hover {
+  &:hover {
     background-color: rgb(84, 179, 238);
   }
 `;

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Avatar } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SearchIcon from '@mui/icons-material/Search';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../firebase';
 
@@ -36,7 +36,7 @@ function Header() {
 
       {/* Right Section */}
       <HeaderRight>
-        <HelpOutlineIcon />
+        <HelpOutlinedIcon />
       </HeaderRight>
     </HeaderContainer>
   );
@@ -102,7 +102,7 @@ const HeaderRight = styled.div`
 const HeaderAvatar = styled(Avatar)`
   cursor: pointer;
 
-  :hover {
+  &:hover {
     opacity: 0.8;
   }
 `;
