@@ -13,7 +13,7 @@ import AppsIcon from '@mui/icons-material/Apps';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
-import { collection} from 'firebase/firestore/';
+import { collection } from 'firebase/firestore';
 import { auth, db} from '../../firebase';
 import { useCollection } from 'react-firebase-hooks/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
