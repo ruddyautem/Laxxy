@@ -10,14 +10,14 @@ import { auth } from '../../firebase';
 function Header() {
   const [user] = useAuthState(auth);
 
-  console.log('User object:', user);
-  console.log('User photoURL:', user?.photoURL);
 
   return (
     <HeaderContainer>
       {/* Left Section */}
       <HeaderLeft>
         <HeaderAvatar
+          role="button" tabIndex={0} aria-label="Déconnexion"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); auth.signOut(); } }}
           onClick={() => auth.signOut()}
           src={user?.photoURL || ''}
           alt={user?.displayName || 'User'}

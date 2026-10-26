@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { db } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { enterRoom } from "../../features/appSlice";
@@ -9,10 +9,10 @@ function SidebarOption({ Icon, title, addChannelOption, id }) {
   const dispatch = useDispatch();
   const addChannel = async () => {
     const channelName = prompt("Nom du canal de discussion");
-    if (channelName) {
+    if (channelName?.trim() && channelName.trim().length <= 100 && auth.currentUser) {
       try {
         const docRef = await addDoc(collection(db, "rooms"), {
-          name: channelName,
+          name: channelName.trim(), ownerUid: auth.currentUser.uid,
         });
         console.log("document written", docRef.id);
       } catch (e) {
@@ -32,7 +32,7 @@ function SidebarOption({ Icon, title, addChannelOption, id }) {
   };
 
   return (
-    <SidebarOptionContainer
+    <SidebarOptionContainer role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (addChannelOption ? addChannel : selectChannel)(); } }}
       onClick={addChannelOption ? addChannel : selectChannel}
     >
       {Icon && <Icon fontSize='small' style={{ padding: 10 }} />}

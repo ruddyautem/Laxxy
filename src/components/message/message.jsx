@@ -7,7 +7,7 @@ function Message({ message, timestamp, user, userImage }) {
       <img src={userImage} alt='user Image' referrerPolicy="no-referrer"/>
       <MessageInfo>
         <h4>
-          {user} <span>{new Date(timestamp?.toDate()).toUTCString()}</span>
+          {user} <span>{timestamp?.toDate ? timestamp.toDate().toLocaleString('fr-FR') : 'En cours…'}</span>
         </h4>
         <p>{message}</p>
       </MessageInfo>

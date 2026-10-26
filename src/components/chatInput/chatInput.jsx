@@ -16,42 +16,41 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 function ChatInput({ channelName, channelId, chatRef }) {
   const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState("");
   const [user] = useAuthState(auth);
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!channelId) {
-      return false;
-    }
-
-    const docRef = doc(db, "rooms", channelId);
-    const colRef = collection(docRef, "messages");
-    addDoc(colRef, {
-      message: input,
-      timestamp: serverTimestamp(),
-      user: user.displayName,
-      userImage: user.photoURL,
-    });
-
-    chatRef.current.scrollIntoView({
-      behavior: "smooth",
-    });
-
-    setInput("");
+    const message = input.trim();
+    if (!channelId || !user || !message || isSending) return;
+    setIsSending(true); setError('');
+    try {
+      await addDoc(collection(doc(db, 'rooms', channelId), 'messages'), {
+        message, timestamp: serverTimestamp(), senderUid: user.uid,
+        user: user.displayName || user.email || 'Utilisateur', userImage: user.photoURL || '',
+      });
+      setInput((current) => current === input ? '' : current);
+      chatRef.current?.scrollIntoView({ behavior: 'smooth' });
+    } catch { setError("Envoi impossible. Votre message est conservé."); }
+    finally { setIsSending(false); }
   };
 
   return (
     <ChatInputContainer>
-      <form action=''>
+      <form onSubmit={sendMessage}>
         <input
+          aria-label={`Message dans ${channelName}`}
+          maxLength={5000}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={`Écrire un message dans #${channelName}`}
         />
-        <Button hidden type='submit' onClick={sendMessage}>
+        <Button hidden type='submit' disabled={isSending}>
           Envoyer
         </Button>
       </form>
+      {error && <p role="alert" style={{ position: "fixed", bottom: 8, marginLeft: 20 }}>{error}</p>}
     </ChatInputContainer>
   );
 }

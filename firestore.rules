@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    // Laxxy is one shared workspace: every authenticated member sees its channels.
+    match /rooms/{roomId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['name','ownerUid']) &&
+        request.resource.data.ownerUid == request.auth.uid && request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100;
+      allow update, delete: if false;
+      match /messages/{messageId} {
+        allow read: if signedIn();
+        allow create: if signedIn() && exists(/databases/$(database)/documents/rooms/$(roomId)) &&
+          request.resource.data.keys().hasOnly(['message','timestamp','senderUid','user','userImage']) &&
+          request.resource.data.senderUid == request.auth.uid && request.resource.data.timestamp == request.time &&
+          request.resource.data.message is string && request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 5000 &&
+          request.resource.data.user == request.auth.token.get('name', request.auth.token.get('email', 'Utilisateur')) &&
+          request.resource.data.userImage == request.auth.token.get('picture', '');
+        allow update, delete: if false;
+      }
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

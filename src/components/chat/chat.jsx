@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -7,20 +7,21 @@ import { selectRoomId } from '../../features/appSlice';
 import ChatInput from '../chatInput/chatInput';
 import { useDocument, useCollection } from 'react-firebase-hooks/firestore';
 import { db } from '../../firebase';
-import { collection, doc, orderBy, query } from 'firebase/firestore';
+import { collection, doc, orderBy, query, limitToLast } from 'firebase/firestore';
 import Message from '../message/message';
 import { useRef, useEffect } from 'react';
 
 function Chat() {
+  const [historySize, setHistorySize] = useState(100);
   const chatRef = useRef(null);
   const roomId = useSelector(selectRoomId);
-  const [roomDetails] = useDocument(roomId && doc(db, 'rooms', roomId));
+  const [roomDetails, , roomError] = useDocument(roomId && doc(db, 'rooms', roomId));
 
-  const [roomMessages, loading] = useCollection(
+  const [roomMessages, loading, messageError] = useCollection(
     roomId &&
       query(
         collection(db, 'rooms', roomId, 'messages'),
-        orderBy('timestamp', 'asc')
+        orderBy('timestamp', 'asc'), limitToLast(historySize)
       )
   );
 
@@ -31,7 +32,8 @@ function Chat() {
   }, [roomId, loading]);
   
   return (
-    <ChatContainer>
+    <ChatContainer onScroll={(e) => { if (e.currentTarget.scrollTop < 20 && roomMessages?.size === historySize) setHistorySize((size) => size + 100); }}>
+      {(roomError || messageError) && <p role='alert'>Impossible de charger ce canal. Vérifiez votre connexion et vos droits d’accès.</p>}
       {roomDetails && roomMessages && (
         <>
           <Header>

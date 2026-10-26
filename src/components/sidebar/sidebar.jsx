@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import CreateIcon from '@mui/icons-material/Create';
@@ -13,23 +13,24 @@ import AppsIcon from '@mui/icons-material/Apps';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
-import { collection } from 'firebase/firestore';
+import { collection, query, limit } from 'firebase/firestore';
 import { auth, db} from '../../firebase';
 import { useCollection } from 'react-firebase-hooks/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 function Sidebar() {
-  const [channels] = useCollection(collection(db, 'rooms'));
+  const [roomLimit, setRoomLimit] = useState(100);
+  const [channels] = useCollection(query(collection(db, 'rooms'), limit(roomLimit)));
   const [user] = useAuthState(auth)
 
   return (
-    <SidebarContainer>
+    <SidebarContainer onScroll={(e) => { const el = e.currentTarget; if (el.scrollHeight - el.scrollTop - el.clientHeight < 30 && channels?.size === roomLimit) setRoomLimit((size) => size + 100); }}>
       <SidebarHeader>
         <SidebarInfo>
           <h2>HQ</h2>
           <h3>
             <FiberManualRecordIcon />
-            {user.displayName}
+            {user?.displayName}
           </h3>
         </SidebarInfo>
         <CreateIcon />
@@ -61,6 +62,7 @@ const SidebarContainer = styled.div`
   flex: 0.3;
   border-top: 1px solid #002a46;
   max-width: 260px;
+  overflow-y: auto;
   margin-top: 60px;
 
   > hr {
